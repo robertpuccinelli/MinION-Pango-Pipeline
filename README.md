@@ -6,7 +6,7 @@ Build a platform that performs real time Pango lineage identification with a Min
 ## Pipeline, High Level
 * Start MinION run  
 * Sequencing files on server updated every 5-10 minutes 
-    * Assemble genome with Arctic 
+    * Assemble genome with artic 
     * Run through PangoLEARN classifier    
 * Report lineage and confidence over time on web interface
 
@@ -20,11 +20,9 @@ Build a platform that performs real time Pango lineage identification with a Min
 	* updates the PangoLEARN lineage classifier, 
 	* allocates space for run details on the web interface, 
 	* and starts the pipeline.
-2. Trigger the [Arctic pipeline](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)
-	* Basecall with Guppy
-	* Demultiplex with Guppy
-	* Filter reads with Arctic
-	* Run the MinION pipeline with Arctic to generate consensus sequences
+2. Trigger the [Artic pipeline](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)
+	* Filter reads with Artic
+	* Run the MinION pipeline with Artic to generate consensus sequences
 	* Aggregate consensus sequences into one file
 3. Upon completing consensus aggregation, start [Pagolin pipeline](https://cov-lineages.org/pangolin_docs/usage.html)
 	* Run pangolin
@@ -33,6 +31,5 @@ Build a platform that performs real time Pango lineage identification with a Min
 5. Script terminates when no file changes are made after 10 minutes
 
 ## Requirements
-* Python 3
+* Docker
 * Bash
-* Cron

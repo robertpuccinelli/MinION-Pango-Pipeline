@@ -1,6 +1,0 @@
-[submodule "pangoLEARN"]
-	path = pangoLEARN
-	url = https://github.com/cov-lineages/pangoLEARN.git
-[submodule "ARCTICncov2019"]
-	path = ARCTICncov2019
-	url = https://github.com/artic-network/artic-ncov2019.git
