@@ -37,7 +37,7 @@ Build a platform that performs real time Pangolin lineage identification with a 
 The webserver is hosted by an Nginx Docker container and shares HTML files with the webserver updater Docker container. If the watchdog is terminated, the webserver terminates.
 
 A fake run page with psuedo data is provided below:
-![Fake run page](./webserver/Fake_RunPage.png)
+![Fake run page](./webserver/example_files/Example_RunPage.png)
 
 ## Requirements
 * Docker
