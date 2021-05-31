@@ -8,7 +8,7 @@ touch ${LOG}
 function printToLog(){
     echo "$(date +"%Y/%m/%d %H:%M:%S")  -  " $1 >> ${LOG}
 }
-printToLog "* * * * *"
+printToLog "# # # # #"
 printToLog "Pangolin processing starting"
 
 files_processed=0
@@ -21,11 +21,10 @@ then
         --threads ${THREADS} \
         --outdir ${DIR_DATA} \
         --outfile lineage_report.csv \
-        --datadir ${DIR_DATA} \
-        consensus_genomes.fasta \
-        > ${LOG} 2>&1
+        ${DIR_DATA}/consensus_genomes.fasta \
+        >> ${LOG} 2>&1
 
-    files_processed++
+    ((files_processed++))
 else
     printToLog "${DIR_DATA}/consensus_genomes.fasta was not found"
 fi

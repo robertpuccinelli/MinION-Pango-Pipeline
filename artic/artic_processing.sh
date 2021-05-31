@@ -52,7 +52,7 @@ do
         --scheme nCov-2019 --scheme_version V3 \
         --read-file ${DIR_TEMP}/${base_name}.fastq \
         --fast5-directory ${DIR_DATA} \
-        --sequencing-summary ${DIR_DATA}/${base_name}.txt \
+        --sequencing-summary ${DIR_DATA}/sequencing_summary*.txt \
         --sample ${DIR_TEMP}/${base_name} 
         > ${LOG} 2>&1
 

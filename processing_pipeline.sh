@@ -14,9 +14,11 @@ cd ${curr_path}
 
 docker pull staphb/artic-ncov2019
 docker pull staphb/pangolin
+docker pull python:3.7
 
 docker build ${script_path}/artic -f artic.Dockerfile -t artic-ncov2019
-docker build ${script_path}/artic -f pango.Dockerfile -t pangolin
+docker build ${script_path}/pangolin -f pangolin.Dockerfile -t pangolin
+docker build ${script_path}/webserver -f server_updater.Dockerfile -t server_updater
 
 last_mod_mins=0
 
@@ -25,13 +27,18 @@ while($last_mod_mins -lt ${TERMINATE_FILE_NOT_CHANGED_MINS})
     time_start= date +"%s"
     for file in $(find $1 -maxdepth 1 -type f -name "*barcode*.fasta")
     do
-        docker run \
-            --mount type=bind,source=$DIR_DATA,target=/data/server \
+        docker run --rm \
+            --mount type=bind,source=${DIR_DATA},target=/data/server \
             artic-ncov2019 ${THREADS}
 
-        docker run \
-            --mount type=bind,source$DIR_DATA,target=/data/server \
+        docker run --rm \
+            --mount type=bind,source=${DIR_DATA},target=/data/server \
             pangolin
+
+        docker run --rm \
+            --mount type=bind,source=${DIR_DATA},target=/data/pipeline \
+            --mount type=bind,source=${DIR_WATCH}/webserver,target=/data/webserver \
+            server_updater
     done
 
     # Limit frequency to once every 3 mins max

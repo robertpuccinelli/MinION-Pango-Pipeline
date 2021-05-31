@@ -1,0 +1,12 @@
+taxon,lineage,conflict,pangolin_version,pangoLEARN_version,pango_version,status,note
+India_seq,B.1.617.1,0.0,2.4.2,2021-05-19,v1.2.6,passed_qc,
+b117,B.1.1.7,0,2.4.2,2021-05-19,v1.2.6,passed_qc,13/17 B.1.1.7 SNPs (0 ref and 4 other)
+outgroup_A,A,0.0,2.4.2,2021-05-19,v1.2.6,passed_qc,
+Japan_seq,B,0.0,2.4.2,2021-05-19,v1.2.6,passed_qc,
+USA_seq,B.1.314,0.0,2.4.2,2021-05-19,v1.2.6,passed_qc,
+This_seq_has_6000_Ns_in_18000_bases,None,0,2.4.2,2021-05-19,v1.2.6,fail,seq_len:18000
+This_seq_has_no_seq,None,0,2.4.2,2021-05-19,v1.2.6,fail,seq_len:0
+This_seq_is_too_short,None,0,2.4.2,2021-05-19,v1.2.6,fail,seq_len:2997
+This_seq_has_lots_of_Ns,None,0,2.4.2,2021-05-19,v1.2.6,fail,N_content:0.98
+This_seq_is_literally_just_N,None,0,2.4.2,2021-05-19,v1.2.6,fail,N_content:1.0
+issue_57_torsten_seq,None,0,2.4.2,2021-05-19,v1.2.6,fail,failed_to_map
