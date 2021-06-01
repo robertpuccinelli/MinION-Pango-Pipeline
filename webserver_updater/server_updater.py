@@ -12,7 +12,7 @@ dir_pipeline = "/data/pipeline"
 
 file_log = dir_pipeline + '/log.txt'
 file_pangolin = dir_pipeline + '/lineage_report.csv'
-file_server_data = dir_webserver + '/webserver_data.csv'
+file_server_data = dir_pipeline + '/webserver_data.csv'
 file_figure_suffix = 'UncertaintyVsTime.png'
 file_home_page = dir_webserver + "/index.html"
 
@@ -56,7 +56,7 @@ def generateHTMLTable(csv_df):
 def printToLog(message):
     time_stamp = time.strftime( "%Y/%m/%d %H:%M:%S",time.localtime(time.time()))
     with open(file_log, "a") as f:
-        f.write(f"{time_stamp}  -  " + message)
+        f.write(f"{time_stamp}  -  " + message + '\n')
 
 
 ################
@@ -98,7 +98,7 @@ if path.exists(file_pangolin):
     # Append data, clean missing values and save session dataframe
     csv_data = csv_data.append(new_row, ignore_index=True)
     csv_data = csv_data.apply(pd.to_numeric, errors='coerce', axis=1).fillna(100)
-    csv_data.to_csv(file_server_data)
+    csv_data.to_csv(file_server_data, index=False)
     printToLog(f"{file_server_data} was saved")
 
     # Get time stamp of first datapoint, t=0
@@ -121,9 +121,9 @@ if path.exists(file_pangolin):
     printToLog(f"{file_figure_name} was saved")
 
     # Generate HTML for run page
-    printToLog{"Generating run page HTML"}
+    printToLog("Generating run page HTML")
     html_table = generateHTMLTable(csv_lineage)
-    html_image = f'<img src="{file_figure_name}" alt="figure" width="65%">'
+    html_image = f'<img src="{path.basename(file_figure_name)}" alt="figure" width="65%">'
     html_output = "<!DOCTYPE html>\n" \
                    "<html>\n" \
                    "<title> MinION Pangolin Pipeline </title>\n" \
@@ -141,13 +141,13 @@ if path.exists(file_pangolin):
     # If first pass, insert link to run page on home page
     if add_link_to_home:
         printToLog(f"Generating link to run page on {file_home_page}")
-        html_link = generateHTMLLink(file_run_page, f"Run: {start_time}")
+        html_link = generateHTMLLink(path.basename(file_run_page), f"Run: {start_time}")
 
         with open(file_home_page, 'r+t') as f:
             buffer = f.readlines()
             for index, line in enumerate(buffer):
                 if '<h2>' in line:
-                    buffer.insert(index + 1, html_link)
+                    buffer.insert(index + 1, html_link + '\n<br>\n')
                     break
             f.seek(0)
             f.writelines(buffer)

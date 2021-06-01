@@ -1,7 +1,8 @@
 #!/bin/bash
 THREADS=$1
 DIR_DATA="/data/server"
-DIR_TEMP="/data/temp"
+DIR_TEMP="/tmp"
+FILE_THRESHOLD=5
 LOG=${DIR_DATA}/log.txt
 touch ${LOG}
 
@@ -11,69 +12,66 @@ function printToLog(){
 printToLog "# # # # #"
 printToLog "Artic processing starting"
 
-# Create file to record processing order to prevent data mixup with final concat
-if [ -e ${DIR_DATA}/process_order.txt ]
-then
-    rm ${DIR_DATA}/process_order.txt
-fi
-
-touch ${DIR_DATA}/process_order.txt
-printToLog "Creating ${DIR_DATA}/process_order.txt"
-
 # Iterate through the guppy_barcoder .fasta files
-files_found=0
-files_processed=0
+barcodes_found=0
+barcodes_processed=0
 
-for file in $(find ${DIR_DATA} -maxdepth 1 -type f -name "*barcode*.fasta")
+for barcode_dir in $(find ${DIR_DATA}/fastq_pass -maxdepth 1 -type d -name "barcode*")
 do
-    files_found++
-    # Store base name of file being operated on
-    base_name= basename ${file} .fasta
+    if [ $(ls ${barcode_dir} | wc -l) -ge ${FILE_THRESHOLD} ]
+    then
+        ((barcodes_found++))
+        barcode_name=$(basename ${barcode_dir})
+        printToLog $"Processing ${barcode_name}/fastq_pass on Artic guppyplex"
 
-    printToLog "Processing ${base_name} on guppyplex"
+        # Filter reads for file and output to temp dir as barcode_name.fastq
+        artic guppyplex \
+            --skip-quality-check\
+            --min-length 400 \
+            --max-length 700 \
+            --directory ${DIR_DATA}/fastq_pass/${barcode_name} \
+            --output ${DIR_TEMP}/${barcode_name}.fastq 1>>${LOG}
 
-    # Filter reads for file and output to temp dir as base_name.fastq
-    artic guppyplex \
-        --min-length 400 \
-        --max-length 700 \
-        --directory ${DIR_DATA}/${base_name} \
-        --output ${DIR_TEMP}/${base_name}.fastq \
-        > ${LOG} 2>&1
+        printToLog $"Generating ${barcode_name} consensus sequence on Artic minion"
 
+        # Assemble filtered reads for file
+        # Assuming summary file is data_dir/barcode_name.txt
+        # Assigned scheme and version to argumentss rather than free floatings
+        ## Nanopolish, script completed on 4750U@3GHz and 16 threads in 17 mins
+        artic minion \
+            --normalise 200 --threads ${THREADS} \
+            --scheme-directory /primer-schemes \
+            --read-file ${DIR_TEMP}/${barcode_name}.fastq \
+            --fast5-directory ${DIR_DATA}/fast5_pass/${barcode_name} \
+            --sequencing-summary ${DIR_DATA}/sequencing_summary*.txt \
+            nCoV-2019/V3 \
+            ${DIR_TEMP}/${barcode_name} 1>>${LOG}
 
-    printToLog "Processing ${base_name} on minion"
-
-    # Assemble filtered reads for file
-    # Assuming summary file is data_dir/base_name.txt
-    # Assigned scheme and version to argumentss rather than free floatings
-    artic minion \
-        --normalise 200 --threads ${THREADS} \
-        --scheme-directory /primer_schemes \
-        --scheme nCov-2019 --scheme_version V3 \
-        --read-file ${DIR_TEMP}/${base_name}.fastq \
-        --fast5-directory ${DIR_DATA} \
-        --sequencing-summary ${DIR_DATA}/sequencing_summary*.txt \
-        --sample ${DIR_TEMP}/${base_name} 
-        > ${LOG} 2>&1
-
-    # Record base name of file processed
-    echo "${base_name}" >> ${DIR_DATA}/process_order.txt
-
-    files_processed++
+         ## Medaka, script completed on 4750U@3GHz and 16 threads in 13 mins
+    #    artic minion \
+    #        --medaka \
+    #        --medaka-model r941_min_fast_g434 \
+    #        --normalise 200 --threads ${THREADS} \
+    #        --scheme-directory /primer-schemes \
+    #        --read-file ${DIR_TEMP}/${barcode_name}.fastq \
+    #        nCoV-2019/V3 \
+    #        ${DIR_TEMP}/${barcode_name} 1>>${LOG}
+        ((barcodes_processed++))
+    fi
 done
 
 if ! [ ${files_found} -eq ${files_processed} ]
 then
-    printToLog "${base_name} caused an error"
+    printToLog $"${barcode_name} caused an error"
 fi
 
-printToLog "Barcode fasta files discovered: ${files_found}"
-printToLog "Files successfully processed  : ${files_processed}"
+printToLog $"Barcode fasta files discovered: ${files_found}"
+printToLog $"Files successfully processed  : ${files_processed}"
 
-if [ -e ${DIR_TEMP}/*.consensus.fasta ]
+if [ -f $(${DIR_TEMP}/*.consensus.fasta) ]
 then
     cat ${DIR_TEMP}/*.consensus.fasta > ${DIR_DATA}/consensus_genomes.fasta
-    printToLog "Generated ${DIR_DATA}/consensus_genomes.fasta"
+    printToLog $"Generated ${DIR_DATA}/consensus_genomes.fasta"
 fi
 
 printToLog "End of Artic processing"

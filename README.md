@@ -18,14 +18,14 @@ Build a platform that performs real time Pangolin lineage identification with a 
 **Server**:
 1. When a new run is started, files are synced to the server. A watchdog observing the sync directory maintains a webserver and starts the data processing pipeline in newly created directories.
 2. The main data processing pipeline updates the Pangolin Covid19 lineage classifier, builds all Docker images and begins periodic processing.
-2. The [Artic pipeline](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html) Docker container starts first:
-	* Filter barcode reads with Artic guppyplex
-	* Generate MinION specific consensus sequences from barcodes
-	* Aggregate consensus sequences into one file
-	* Dispose of intermediate files
+2. The [Artic pipeline](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html) Docker container starts first and operates of barcode directories containing 5 or more FASTQ files:
+	* Filters barcode reads with Artic guppyplex
+	* Generates MinION specific consensus sequences from barcodes
+	* Aggregates consensus sequences into one file
+	* Disposes of intermediate files
 3. Upon completing consensus aggregation, start [Pagolin pipeline](https://cov-lineages.org/pangolin_docs/usage.html) Docker container:
 	* Input consensus sequence FASTA
-	* Generate an output CSV detailing probable lineage and uncertainty
+	* Generates an output CSV detailing probable lineage and uncertainty
 4. With the Pangolin output CSV, the webserver updater Docker container:
 	* Parses the CSV to extract relevant data
 	* Appends data to a separate CSV capturing the time series data
