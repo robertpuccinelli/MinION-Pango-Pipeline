@@ -50,7 +50,7 @@ do
          ## Medaka, script completed on 4750U@3GHz and 16 threads in 13 mins
         artic minion \
             --medaka \
-            --medaka-model r941_min_fast_g434 \
+            --medaka-model r941_min_high_g360 \
             --normalise 200 --threads ${THREADS} \
             --scheme-directory /primer-schemes \
             --read-file ${DIR_TEMP}/${barcode_name}.fastq \
