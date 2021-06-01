@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 dir_webserver = "/data/webserver"
 dir_pipeline = "/data/pipeline"
 
-file_log = dir_pipeline + '/log.txt'
+file_log = dir_pipeline + '/pipeline_log.txt'
 file_pangolin = dir_pipeline + '/lineage_report.csv'
 file_server_data = dir_pipeline + '/webserver_data.csv'
 file_figure_suffix = 'UncertaintyVsTime.png'

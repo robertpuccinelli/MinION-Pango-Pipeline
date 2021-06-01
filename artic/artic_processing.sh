@@ -3,7 +3,7 @@ THREADS=$1
 DIR_DATA="/data/server"
 DIR_TEMP="/tmp"
 FILE_THRESHOLD=5
-LOG=${DIR_DATA}/log.txt
+LOG=${DIR_DATA}/pipeline_log.txt
 touch ${LOG}
 
 function printToLog(){
@@ -30,7 +30,7 @@ do
             --min-length 400 \
             --max-length 700 \
             --directory ${DIR_DATA}/fastq_pass/${barcode_name} \
-            --output ${DIR_TEMP}/${barcode_name}.fastq 1>>${LOG}
+            --output ${DIR_TEMP}/${barcode_name}.fastq
 
         printToLog $"Generating ${barcode_name} consensus sequence on Artic minion"
 
@@ -38,24 +38,24 @@ do
         # Assuming summary file is data_dir/barcode_name.txt
         # Assigned scheme and version to argumentss rather than free floatings
         ## Nanopolish, script completed on 4750U@3GHz and 16 threads in 17 mins
-        artic minion \
-            --normalise 200 --threads ${THREADS} \
-            --scheme-directory /primer-schemes \
-            --read-file ${DIR_TEMP}/${barcode_name}.fastq \
-            --fast5-directory ${DIR_DATA}/fast5_pass/${barcode_name} \
-            --sequencing-summary ${DIR_DATA}/sequencing_summary*.txt \
-            nCoV-2019/V3 \
-            ${DIR_TEMP}/${barcode_name} 1>>${LOG}
-
-         ## Medaka, script completed on 4750U@3GHz and 16 threads in 13 mins
     #    artic minion \
-    #        --medaka \
-    #        --medaka-model r941_min_fast_g434 \
     #        --normalise 200 --threads ${THREADS} \
     #        --scheme-directory /primer-schemes \
     #        --read-file ${DIR_TEMP}/${barcode_name}.fastq \
+    #        --fast5-directory ${DIR_DATA}/fast5_pass/${barcode_name} \
+    #        --sequencing-summary ${DIR_DATA}/sequencing_summary*.txt \
     #        nCoV-2019/V3 \
-    #        ${DIR_TEMP}/${barcode_name} 1>>${LOG}
+    #        ${DIR_TEMP}/${barcode_name}
+
+         ## Medaka, script completed on 4750U@3GHz and 16 threads in 13 mins
+        artic minion \
+            --medaka \
+            --medaka-model r941_min_fast_g434 \
+            --normalise 200 --threads ${THREADS} \
+            --scheme-directory /primer-schemes \
+            --read-file ${DIR_TEMP}/${barcode_name}.fastq \
+            nCoV-2019/V3 \
+            ${DIR_TEMP}/${barcode_name}
         ((barcodes_processed++))
     fi
 done

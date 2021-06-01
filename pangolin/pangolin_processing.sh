@@ -2,7 +2,7 @@
 
 THREADS=$1
 DIR_DATA="/data/server"
-LOG=${DIR_DATA}/log.txt
+LOG=${DIR_DATA}/pipeline_log.txt
 touch ${LOG}
 
 function printToLog(){
@@ -22,7 +22,7 @@ then
         --outdir ${DIR_DATA} \
         --outfile lineage_report.csv \
         ${DIR_DATA}/consensus_genomes.fasta \
-        >> ${LOG} 2>&1
+        1>>${LOG}
 
     ((files_processed++))
 else
