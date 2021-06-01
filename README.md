@@ -1,4 +1,4 @@
-# MinION-Pango-Pipeline
+# MinION-Pangolin-Pipeline
 
 ## Objective
 Build a platform that performs real time Pangolin lineage identification with a MinION to help operators determine when to end a run while improving sequencing throughput and flow cell efficiency.
@@ -16,7 +16,7 @@ Build a platform that performs real time Pangolin lineage identification with a 
 2. File syncing stops when there are no changed files after 10 minutes
 
 **Server**:
-1. When a new run is started, files are synced to the server. A watchdog observing the sync directory maintains a webserver and starts the data processing pipeline in newly created directories.
+1. When a new run is started, files are synced to the server. A watchdog observing the sync directory maintains a webserver and starts the data processing pipeline in newly created directories. 
 2. The main data processing pipeline updates the Pangolin Covid19 lineage classifier, builds all Docker images and begins periodic processing.
 2. The [Artic pipeline](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html) Docker container starts first and operates of barcode directories containing 5 or more FASTQ files:
 	* Filters barcode reads with Artic guppyplex
