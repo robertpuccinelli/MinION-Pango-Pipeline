@@ -5,7 +5,7 @@
 # Minutes wait for change before terminating optional 3rd, default 10
 DIR_DATA=$1
 THREADS=${2:-8}
-TERMINATE_FILE_NOT_CHANGED_MINS=${3:-10}
+TERMINATE_FILE_NOT_CHANGED_MINS=${3:-15}
 
 script_path=$(dirname $(realpath ${BASH_SOURCE%}))
 LOG=${DIR_DATA}/pipeline_log.txt
@@ -70,9 +70,9 @@ do
         --mount type=bind,source=${DIR_WATCH}/webserver,target=/data/webserver \
         server_updater
 
-    # Limit frequency to once every 3 mins max
+    # Limit frequency to once every 10 mins max
     time_now="$(date +"%s")"
-    time_remaining=$(($((${time_start} + 180)) - ${time_now}))
+    time_remaining=$(($((${time_start} + 600)) - ${time_now}))
     if [ ${time_remaining} -gt 0 ]
     then
         printToLog "Sleeping for ${time_remaining} seconds"

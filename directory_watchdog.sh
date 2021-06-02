@@ -30,9 +30,6 @@ docker run --name=minion-webserver --rm -d \
 --publish ${PORT}:80 \
 nginx:alpine
 
-# Shutdown webserver if the watchdog stops
-trap 'docker stop minion-webserver' INT TERM
-
 printToLog $"MinION webserver launched on localhost:${PORT}"
 
 # Pipeline will be initialized in new directories
@@ -55,5 +52,9 @@ do
 
     sleep 5m
 done
+
+
+# Shutdown webserver if the watchdog stops
+trap 'docker stop minion-webserver' INT TERM
 
 docker stop minion-webserver

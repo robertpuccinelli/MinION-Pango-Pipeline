@@ -39,6 +39,14 @@ The webserver is hosted by an Nginx Docker container and shares HTML files with 
 A fake run page with psuedo data is provided below:
 ![Fake run page](./webserver/example_files/Example_RunPage.png)
 
+## Future Features
+
+From: barcode.coverage_mask.ncov-2.depth
+* Coverage graphs for each sample
+* Near bottom coverage
+* Average coverage
+* Number of zeros
+
 ## Requirements
 * Docker
 * Bash
