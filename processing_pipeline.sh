@@ -7,7 +7,7 @@ DIR_DATA=$1
 THREADS=${2:-8}
 TERMINATE_FILE_NOT_CHANGED_MINS=${3:-10}
 
-script_path=$(dirname $(realpath ${BASH_SOURCE%/*}))
+script_path=$(dirname $(realpath ${BASH_SOURCE%}))
 LOG=${DIR_DATA}/pipeline_log.txt
 touch ${LOG}
 

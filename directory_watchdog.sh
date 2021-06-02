@@ -46,14 +46,14 @@ do
 
             # Start processing pipeline in directory
             nohup source ${DIR_SOURCE}/processing_pipeline.sh ${dir_path} &
-            
+
             # Add directory to log
             printToLog ${dir_path}
         fi
 
     done
 
-    sleep 1m
+    sleep 5m
 done
 
 docker stop minion-webserver

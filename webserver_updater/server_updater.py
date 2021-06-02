@@ -106,7 +106,8 @@ if path.exists(file_pangolin):
 
     # Reformat modified date to be minutes since first time stamp
     csv_data['modified'] = (csv_data['modified'] - csv_data['modified'][0]) / 60
-
+    csv_data = csv_data + .1
+    
     # Generate new figure from session data
     printToLog("Generating figure")
     file_figure_name = dir_webserver + '/' + start_time + "_" + file_figure_suffix
