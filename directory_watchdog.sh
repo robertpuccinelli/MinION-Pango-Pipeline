@@ -2,7 +2,7 @@
 
 # Change to directory being watched
 DIR_WATCH=$(realpath $1)
-DIR_SOURCE=$(dirname $(realpath ${BASH_SOURCE%/*}))
+DIR_SOURCE=$(dirname $(realpath ${BASH_SOURCE%}))
 PORT=8528
 cd ${DIR_WATCH}
 
