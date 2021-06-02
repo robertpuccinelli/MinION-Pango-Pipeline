@@ -45,7 +45,7 @@ do
         then
 
             # Start processing pipeline in directory
-            nohup source ${DIR_SOURCE}/processing_pipeline.sh ${dir_path} &
+            nohup $(source ${DIR_SOURCE}/processing_pipeline.sh ${dir_path} &)
 
             # Add directory to log
             printToLog ${dir_path}
