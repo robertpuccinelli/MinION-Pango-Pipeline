@@ -2,7 +2,7 @@
 THREADS=$1
 DIR_DATA="/data/server"
 DIR_TEMP="/tmp"
-FILE_THRESHOLD=5
+FILE_THRESHOLD=2
 LOG=${DIR_DATA}/pipeline_log.txt
 touch ${LOG}
 
