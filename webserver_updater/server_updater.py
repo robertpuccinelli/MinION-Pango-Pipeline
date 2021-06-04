@@ -130,6 +130,7 @@ if path.exists(file_pangolin):
     fig = plt.figure(figsize=[15,3*len(barcodes_present)])
     spec = gridspec.GridSpec(ncols=2, nrows=len(barcodes_present), width_ratios=[2,1])
 
+    printToLog("Begining data extraction")
     # Extract data per barcode, save XLSX sheet, generate subplot
     for idx, barcode in barcodes_present:
         barcode_df, depth = processBarcodeDepths(barcode)
