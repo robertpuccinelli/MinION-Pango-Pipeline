@@ -1,5 +1,8 @@
 FROM staphb/artic-ncov2019:latest
 
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /data/
 RUN mkdir /data/server \
     && mkdir /data/data_temp

@@ -5,7 +5,7 @@
 # Minutes wait for change before terminating optional 3rd, default 10
 DIR_DATA=$1
 THREADS=${2:-8}
-TERMINATE_FILE_NOT_CHANGED_MINS=${3:-15}
+TERMINATE_FILE_NOT_CHANGED_MINS=${3:-50}
 
 script_path=$(dirname $(realpath ${BASH_SOURCE%}))
 LOG=${DIR_DATA}/pipeline_log.txt
@@ -43,7 +43,7 @@ docker build ${script_path}/pangolin -f ${script_path}/pangolin/pangolin.Dockerf
 printToLog "Building Webserver Updater Dockerfile"
 docker build ${script_path}/webserver_updater -f ${script_path}/webserver_updater/server_updater.Dockerfile -t server_updater
 
-printToLog $"Processing directory until no changes after ${TERMINATE_FILE_NOT_CHANGED_MINS}"
+printToLog $"Processing directory until no changes after ${TERMINATE_FILE_NOT_CHANGED_MINS} minutes"
 last_update=$(dirMinsSinceUpdate ${DIR_DATA}/fastq_pass)
 printToLog $"Last FASTQ was made ${last_update} minutes ago"
 
@@ -58,16 +58,23 @@ do
         --mount type=bind,source=${DIR_DATA},target=/data/server \
         artic-ncov2019 ${THREADS}
 
-    printToLog "Starting Pangolin Docker container"
-    docker run --rm \
-        --mount type=bind,source=${DIR_DATA},target=/data/server \
-        pangolin
+    if [ -f ${DIR_DATA}/consensus_genomes.fasta ]
+    then
 
-    printToLog "Starting webserver updater Docker container"
-    docker run --rm \
-        --mount type=bind,source=${DIR_DATA},target=/data/pipeline \
-        --mount type=bind,source=${DIR_WATCH}/webserver,target=/data/webserver \
-        server_updater
+        printToLog "Starting Pangolin Docker container"
+        docker run --rm \
+            --mount type=bind,source=${DIR_DATA},target=/data/server \
+            pangolin
+
+        printToLog "Starting webserver updater Docker container"
+        docker run --rm \
+            --mount type=bind,source=${DIR_DATA},target=/data/pipeline \
+            --mount type=bind,source=${DIR_WATCH}/webserver,target=/data/webserver \
+            server_updater
+    
+    else
+        printToLog "Data not ready for pipeline. consensus_genome.fasta not yet generated"
+    fi
 
     # Limit frequency to once every 10 mins max
     time_now="$(date +"%s")"

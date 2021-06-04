@@ -63,15 +63,15 @@ do
     fi
 done
 
-if ! [ ${files_found} -eq ${files_processed} ]
+if ! [ ${barcodes_found} -eq ${barcodes_processed} ]
 then
     printToLog $"${barcode_name} caused an error"
 fi
 
-printToLog $"Barcode fasta files discovered: ${files_found}"
-printToLog $"Files successfully processed  : ${files_processed}"
+printToLog $"Barcode fasta files discovered: ${barcodes_found}"
+printToLog $"Files successfully processed  : ${barcodes_processed}"
 
-if [ -f $(${DIR_TEMP}/*.consensus.fasta) ]
+if [ -f ${DIR_TEMP}/*.consensus.fasta ]
 then
     cat ${DIR_TEMP}/*.consensus.fasta > ${DIR_DATA}/consensus_genomes.fasta
     printToLog $"Generated ${DIR_DATA}/consensus_genomes.fasta"
