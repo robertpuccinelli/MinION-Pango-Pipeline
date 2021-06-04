@@ -1,9 +1,10 @@
 import os.path as path
 import pandas as pd
+import numpy.random as rand
 import time
 import glob
 import matplotlib.pyplot as plt
-
+from matplotlib import gridspec
 ##############
 # FILE PATHS #
 ##############
@@ -37,7 +38,7 @@ def generateHTMLTableRow(header=False, *args):
 
 def generateHTMLTable(html_table_rows):
     table_string = "<font size=4>\n"
-    table_string += '<table border=1 style="width:65%">\n'
+    table_string += '<table border=1 style="width:75%">\n'
     table_string += html_table_rows
     table_string += "</table>\n"
     table_string += "</font>"
@@ -49,7 +50,7 @@ def printToLog(message):
         f.write(f"{time_stamp}  -  " + message + '\n')
 
 
-def processBarcodeDepths(barcode, time_stamp):
+def processBarcodeDepths(barcode):
     path_barcode = dir_pipeline + '/' + barcode
     barcode_list = glob.glob(path_barcode + "*.depths")
     if len(barcode_list) == 2:
@@ -58,29 +59,27 @@ def processBarcodeDepths(barcode, time_stamp):
         barcode_depth = bar1[3] + bar2[3]
 
         new_df_row = {}
-        new_df_row['coverage_average'] = barcode_depth.mean()
-        new_df_row['coverage_percent'] = sum(barcode_depth > 0) / len(barcode_depth)
-        new_df_row['coverage_lowest5'] = barcode_depth.groupby(pd.qcut(barcode_depth,20)).mean()[0]
-
+        new_df_row['total_reads'] = sum(barcode_depth)
+        new_df_row['coverage_average'] = round(barcode_depth.mean(),2)
+        new_df_row['coverage_percent'] = round(sum(barcode_depth > 0) / len(barcode_depth),3)
+        new_df_row['coverage_lowest5'] = round(barcode_depth.sort_values(ignore_index=True).iloc[0:round(len(barcode_depth)/20)].values.mean(),2)
+            
     return new_df_row, barcode_depth            
 
-def appendNewCoverageSubplot(barcode_depths, barcode_stats, barcode_name):
-        barcode_depths.plot.area(xlim=[0,len(barcode_depths)])
-        barcode_depths.plot(color='k')
-        plt.title(f'{barcode_name} Coverage', fontsize=16)
-        plt.axline((0, barcode_stats['coverage_average']), (1, barcode_stats['coverage_average']), linewidth=4, color='r')
-        plt.axline( (0,barcode_stats['coverage_lowest5']), (1,barcode_stats['coverage_lowest5']),color='r',linewidth=2, linestyle='--')
-        plt.yscale('log')
-        plt.ylim([.8,barcode_depths.max()])
+def appendNewCoverageSubplot(barcode_depths, barcode_stats, barcode_name, ax):
+    barcode_depths.plot.area(xlim=[0,len(barcode_depths)], ax=ax)
+    barcode_depths.plot(color='k')
+    plt.axline((0, barcode_stats['coverage_average']), (1, barcode_stats['coverage_average']), linewidth=2, color='r')
+    plt.axline( (0,barcode_stats['coverage_lowest5']), (1,barcode_stats['coverage_lowest5']),color='r',linewidth=1, linestyle='--')
+    plt.ylabel(barcode_name, fontsize=12)
+    plt.yscale('log')
+    plt.ylim([.8,1000])
 
-def appendNewTimeSeriesSubplot(barcode_df, time_start, barcode_name):
+def appendNewTimeSeriesSubplot(barcode_df, time_start, barcode_name, ax):
     plot_df = pd.DataFrame()
-    plot_df['time'] = (barcode_df['modified'] - time_start) / 60
-    plot_df['coverage'] = barcode_df['percent_coverage']
-    plot_df.plot(x='time')
-    plt.title(f'{barcode_name} Percent Coverage', fontsize=16)
-    plt.xlabel('Time (minutes)', fontsize=13)
-    plt.ylabel('Percent Coverage', fontsize=13)
+    plot_df['time'] = (barcode_df['modified'].values - time_start) / 60
+    plot_df['coverage'] = barcode_df['coverage_percent']
+    plot_df.plot(x='time', ax=ax, legend=False)
     plt.ylim([0, 100])
     
 ################
@@ -121,13 +120,15 @@ if path.exists(file_pangolin):
                                       "Sample ID", 
                                       "Lineage", 
                                       "Conflict", 
-                                      "Note",
+                                      "Total Reads",
                                       "Percent Coverage",
                                       "Average Coverage",
-                                      "Coverage, Lowest 5%")
+                                      "Coverage, Lowest 5%",
+                                      "Note")
 
     barcodes_present = [ (idx,split) for idx, barcode in enumerate(csv_lineage['taxon']) for split in barcode.split('/') if "barcode" in split]
-    fig = plt.figure(figsize=[10,5*len(barcodes_present)])
+    fig = plt.figure(figsize=[15,3*len(barcodes_present)])
+    spec = gridspec.GridSpec(ncols=2, nrows=len(barcodes_present), width_ratios=[2,1])
 
     # Extract data per barcode, save XLSX sheet, generate subplot
     for idx, barcode in barcodes_present:
@@ -138,16 +139,18 @@ if path.exists(file_pangolin):
         barcode_df['modified'] = current_time    
         printToLog(f"New data processed: {barcode_df}")
 
+        print(barcode_df)
+
         barcode_df_xlsx = pd.DataFrame()
 
         if barcode in barcodes_old:
             printToLog(f"{barcode} was found in {file_server_data}")
             barcode_df_xlsx = pd.read_excel(file_server_data, sheet_name=barcode)
 
-        barcode_df_xlsx.append(barcode_df, ignore_index=True)
+        barcode_df_xlsx = barcode_df_xlsx.append(barcode_df, ignore_index=True)
 
         printToLog(f"Creating xlsx page '{barcode}' in {file_server_data}")
-        writer = pd.ExcelWriter(file_server_data, engine=xlsxwriter)
+        writer = pd.ExcelWriter(file_server_data, engine='xlsxwriter')
         barcode_df_xlsx.to_excel(writer, sheet_name=barcode,index=False)
         writer.save()
 
@@ -155,21 +158,28 @@ if path.exists(file_pangolin):
         html_tab_r += generateHTMLTableRow( False, barcode, 
                                             barcode_df['lineage'],
                                             barcode_df['conflict'],
-                                            barcode_df['note'],
+                                            barcode_df['total_reads'],
                                             barcode_df['coverage_percent'],
                                             barcode_df['coverage_average'],
-                                            barcode_df['coverage_lowest5'])
+                                            barcode_df['coverage_lowest5'],
+                                            barcode_df['note'])
 
 
         # Generate subplots
+        if i > 1:
+            axes=[fig.get_axes()[0], fig.get_axes()[1]]
+        else:
+            axes = [None, None]
+        ax = plt.subplot(spec[i],sharex = axes[0])
+        appendNewCoverageSubplot(depth, barcode_df, barcode, ax)
         i = i + 1
-        plt.subplots(len(barcodes_present), 2, i)
-        appendNewCoverageSubplot(depth, barcode_df, barcode)
+        ax = plt.subplot(spec[i], sharex=axes[1])
+        appendNewTimeSeriesSubplot(barcode_df_xlsx, start_time_epoch, barcode, ax)
+        i = i + 1
 
-        plt.subplots(len(barcodes_present), 2, i+1)
-        appendNewTimeSeriesSubplot(barcode_df_xlsx, start_time_epoch, barcode)
-
-
+    axes=[fig.get_axes()[0], fig.get_axes()[1]]
+    axes[0].set_title('Genome Coverage', fontsize=14)
+    axes[1].set_title('Percent Coverage vs Time', fontsize=14)
 
     # Create the base page
     new_barcodes = [barcode for _, barcode in barcodes_present]
@@ -178,14 +188,14 @@ if path.exists(file_pangolin):
     base_df['StartTime'] = start_time_epoch
 
     printToLog(f"Creating xlsx page 'base' in {file_server_data}")
-    writer = pd.ExcelWriter(file_server_data, engine=xlsxwriter)
+    writer = pd.ExcelWriter(file_server_data, engine='xlsxwriter')
     base_df.to_excel(writer, sheet_name='base',index=False)
     writer.save()
     
     # Generate new figure from session data
     printToLog("Saving figure")
     file_figure_name = dir_webserver + '/' + start_time + "_" + file_figure_suffix
-    plt.savefig(file_figure_name, bbox_inches='tight', dpi=200)
+    plt.savefig(file_figure_name,  bbox_inches='tight', dpi=200)
     printToLog(f"{file_figure_name} was saved")
 
     # Generate HTML for run page
@@ -197,8 +207,13 @@ if path.exists(file_pangolin):
                    "<title> MinION Pangolin Pipeline </title>\n" \
                    "<body> \n"\
                    f"<h1>Run: {start_time}</h1> \n" \
-                   f"Updates every 10 minutes. Last updated: {start_time}" \
+                   f"Last updated: {start_time} <br>\nUpdates every 10 minutes.\n<br>\n" \
+                   "<br>\n" \
+                   "<br>\n" \
                    f"{html_table} \n"\
+                   "<br>\n" \
+                   "<br>\n" \
+                   "<br>\n" \
                    f"{html_image} \n" \
                    "</body> \n" \
                    "</html>"
