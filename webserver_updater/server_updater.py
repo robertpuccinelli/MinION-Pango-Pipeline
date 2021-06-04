@@ -38,7 +38,7 @@ def generateHTMLTableRow(header=False, *args):
 
 def generateHTMLTable(html_table_rows):
     table_string = "<font size=4>\n"
-    table_string += '<table border=1 style="width:75%">\n'
+    table_string += '<table border=1 style="width:100%">\n'
     table_string += html_table_rows
     table_string += "</table>\n"
     table_string += "</font>"
@@ -61,14 +61,14 @@ def processBarcodeDepths(barcode):
         new_df_row = {}
         new_df_row['total_reads'] = sum(barcode_depth)
         new_df_row['coverage_average'] = round(barcode_depth.mean(),2)
-        new_df_row['coverage_percent'] = round(sum(barcode_depth > 0) / len(barcode_depth),3)
+        new_df_row['coverage_percent'] = round(sum(barcode_depth > 0) / len(barcode_depth),4)
         new_df_row['coverage_lowest5'] = round(barcode_depth.sort_values(ignore_index=True).iloc[0:round(len(barcode_depth)/20)].values.mean(),2)
             
     return new_df_row, barcode_depth            
 
 def appendNewCoverageSubplot(barcode_depths, barcode_stats, barcode_name, ax):
     barcode_depths.plot.area(xlim=[0,len(barcode_depths)], ax=ax)
-    barcode_depths.plot(color='k')
+    barcode_depths.plot(color='k',linewidth=.5)
     plt.axline((0, barcode_stats['coverage_average']), (1, barcode_stats['coverage_average']), linewidth=2, color='r')
     plt.axline( (0,barcode_stats['coverage_lowest5']), (1,barcode_stats['coverage_lowest5']),color='r',linewidth=1, linestyle='--')
     plt.ylabel(barcode_name, fontsize=12)
@@ -78,7 +78,7 @@ def appendNewCoverageSubplot(barcode_depths, barcode_stats, barcode_name, ax):
 def appendNewTimeSeriesSubplot(barcode_df, time_start, barcode_name, ax):
     plot_df = pd.DataFrame()
     plot_df['time'] = (barcode_df['modified'].values - time_start) / 60
-    plot_df['coverage'] = barcode_df['coverage_percent']
+    plot_df['coverage'] = barcode_df['coverage_percent']*100
     plot_df.plot(x='time', ax=ax, legend=False)
     plt.ylim([0, 100])
     
@@ -120,7 +120,7 @@ if path.exists(file_pangolin):
                                       "Sample ID", 
                                       "Lineage", 
                                       "Conflict", 
-                                      "Total Reads",
+                                      "Total Reads (k)",
                                       "Percent Coverage",
                                       "Average Coverage",
                                       "Coverage, Lowest 5%",
@@ -158,8 +158,8 @@ if path.exists(file_pangolin):
         html_tab_r += generateHTMLTableRow( False, barcode, 
                                             barcode_df['lineage'],
                                             barcode_df['conflict'],
-                                            barcode_df['total_reads'],
-                                            barcode_df['coverage_percent'],
+                                            f"{round(barcode_df['total_reads']/1000)}",
+                                            f"{barcode_df['coverage_percent']*100:.2f}%",
                                             barcode_df['coverage_average'],
                                             barcode_df['coverage_lowest5'],
                                             barcode_df['note'])
@@ -200,7 +200,7 @@ if path.exists(file_pangolin):
 
     # Generate HTML for run page
     printToLog("Generating run page HTML")
-    html_image = f'<img src="{path.basename(file_figure_name)}" alt="figure" width="75%">'
+    html_image = f'<img src="{path.basename(file_figure_name)}" alt="figure" width="100%">'
     html_table = generateHTMLTable(html_tab_r)
     html_output = "<!DOCTYPE html>\n" \
                    "<html>\n" \
