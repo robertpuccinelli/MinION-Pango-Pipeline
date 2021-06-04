@@ -57,6 +57,9 @@ do
             nCoV-2019/V3 \
             ${DIR_TEMP}/${barcode_name}
         ((barcodes_processed++))
+
+        mv ${DIR_TEMP}/${barcode_name}*1.depths ${DIR_DATA}/${barcode_name}_1.depths
+        mv ${DIR_TEMP}/${barcode_name}*2.depths ${DIR_DATA}/${barcode_name}_2.depths
     fi
 done
 

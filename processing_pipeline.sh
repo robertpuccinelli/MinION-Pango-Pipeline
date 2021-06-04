@@ -57,7 +57,6 @@ do
     docker run --rm \
         --mount type=bind,source=${DIR_DATA},target=/data/server \
         artic-ncov2019 ${THREADS}
-     Unable to capture errors from Artic pipeline since nearly all output is sent to stderr
 
     printToLog "Starting Pangolin Docker container"
     docker run --rm \
