@@ -9,8 +9,7 @@ RUN echo $TZ > /etc/timezone && \
     apt-get clean
 
 WORKDIR /data/
-RUN mkdir /data/server \
-    && mkdir /data/data_temp
+RUN mkdir /data/server
 
 COPY ./artic_processing.sh /data/artic_processing.sh
 

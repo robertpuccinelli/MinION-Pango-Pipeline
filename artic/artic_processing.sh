@@ -71,7 +71,7 @@ fi
 printToLog $"Barcode fasta files discovered: ${barcodes_found}"
 printToLog $"Files successfully processed  : ${barcodes_processed}"
 
-if [ -f ${DIR_TEMP}/*.consensus.fasta ]
+if [ $(ls -l ${DIR_TEMP} | grep -c "consensus.fasta") -gt 0 ]
 then
     cat ${DIR_TEMP}/*.consensus.fasta > ${DIR_DATA}/consensus_genomes.fasta
     printToLog $"Generated ${DIR_DATA}/consensus_genomes.fasta"
