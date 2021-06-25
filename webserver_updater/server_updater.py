@@ -127,6 +127,9 @@ if path.exists(file_pangolin):
                                       "Note")
 
     barcodes_present = [ (idx,split) for idx, barcode in enumerate(csv_lineage['taxon']) for split in barcode.split('/') if "barcode" in split]
+    if barcodes_present:
+        writer = pd.ExcelWriter(file_server_data, engine='xlsxwriter')
+
     fig = plt.figure(figsize=[15,3*len(barcodes_present)])
     spec = gridspec.GridSpec(ncols=2, nrows=len(barcodes_present), width_ratios=[2,1])
 
@@ -148,12 +151,10 @@ if path.exists(file_pangolin):
             printToLog(f"{barcode} was found in {file_server_data}")
             barcode_df_xlsx = pd.read_excel(file_server_data, sheet_name=barcode)
 
-        barcode_df_xlsx = barcode_df_xlsx.append(barcode_df, ignore_index=True)
-
         printToLog(f"Creating xlsx page '{barcode}' in {file_server_data}")
-        writer = pd.ExcelWriter(file_server_data, engine='xlsxwriter')
-        barcode_df_xlsx.to_excel(writer, sheet_name=barcode,index=False)
-        writer.save()
+        barcode_df_xlsx = barcode_df_xlsx.append(barcode_df, ignore_index=True)
+        barcode_df_xlsx.to_excel(writer, sheet_name=barcode, index=False)
+
 
         # Generate HTML row
         html_tab_r += generateHTMLTableRow( False, barcode, 
@@ -184,13 +185,12 @@ if path.exists(file_pangolin):
 
     # Create the base page
     new_barcodes = [barcode for _, barcode in barcodes_present]
-    base_df = pd.DataFrame()
-    base_df['barcodes'] = new_barcodes
-    base_df['StartTime'] = start_time_epoch
+    new_base_df = pd.DataFrame()
+    new_base_df['barcodes'] = new_barcodes
+    new_base_df['StartTime'] = start_time_epoch
 
     printToLog(f"Creating xlsx page 'base' in {file_server_data}")
-    writer = pd.ExcelWriter(file_server_data, engine='xlsxwriter')
-    base_df.to_excel(writer, sheet_name='base',index=False)
+    new_base_df.to_excel(writer, sheet_name='base',index=False)
     writer.save()
     
     # Generate new figure from session data
