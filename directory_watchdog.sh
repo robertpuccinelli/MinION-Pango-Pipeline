@@ -25,7 +25,8 @@ then
     cp ${DIR_SOURCE}/webserver/index.html ${DIR_WATCH}/webserver/index.html
 fi
 
-docker run --name=minion-webserver --rm -d \
+docker run --restart=unless-stopped \
+--name=minion-webserver --rm -d \
 --mount type=bind,source=${DIR_WATCH}/webserver,target=/usr/share/nginx/html,readonly \
 --publish ${PORT}:80 \
 nginx:alpine
