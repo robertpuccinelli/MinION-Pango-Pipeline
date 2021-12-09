@@ -26,7 +26,7 @@ then
 fi
 
 docker run --restart=unless-stopped \
---name=minion-webserver --rm -d \
+--name=minion-webserver -d \
 --mount type=bind,source=${DIR_WATCH}/webserver,target=/usr/share/nginx/html,readonly \
 --publish ${PORT}:80 \
 nginx:alpine
